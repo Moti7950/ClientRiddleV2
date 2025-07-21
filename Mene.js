@@ -1,6 +1,6 @@
 import readline from 'readline-sync';
 import 'dotenv/config'
-import { newUser } from './utils/utilityFunction.js';
+import { newUser, riddleTemplate } from './utils/utilityFunction.js';
 
 let running = true;
 
@@ -43,7 +43,7 @@ async function startMene() {
                         console.log(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathCreateUser}`)
                         //started to create a user
                         //
-                        new Promise(resolve => setTimeout(resolve, 1000))
+                       await new Promise(resolve => setTimeout(resolve, 1000))
                         const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathCreateUser}`, {
                             method: "POST",
                             headers: {
@@ -69,12 +69,15 @@ async function startMene() {
                 try {
 
                     const newRiddle = await riddleTemplate()
-                    new Promise(resolve => setTimeout(resolve, 1000))
+                   await new Promise(resolve => setTimeout(resolve, 1000))
+                   console.log(typeof newRiddle , newRiddle);
+                   
                     const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathCreateReiddle}`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
                         },
+                        
                         body: JSON.stringify(newRiddle)
                     })
                     console.log("conect sucsessfuly")

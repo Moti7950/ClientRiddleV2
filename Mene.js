@@ -31,6 +31,7 @@ async function startMene() {
                 console.log("🎮 Let's play the game!");
                 //serch by id!, I need to create a smart serch by name 
                 const id = readline.question("Please enter yore id, if you dont have enter 0: ")
+                //צריך לעשות משתנה ששומר את הערך של הלקוח ובודק האם הוא בתוך הDB בשביל לחפש אותו או ליצור אותו, וכמובן לשנות את התנאים
                 if (id === "0") {
                     try {
                         const name = readline.question("Please enter your name: ")
@@ -61,7 +62,14 @@ async function startMene() {
                         console.log("oopss samting wrong ", error);
                     }
                 }
+                else{
+                    console.log(`🔍 Trying to fetch from: http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`);
 
+                    const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`)
+                    const data = await response.json();
+                    console.log(data);
+                    
+                }
                 break;
 
             case "2":

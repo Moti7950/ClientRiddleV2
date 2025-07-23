@@ -1,6 +1,6 @@
 import readline from 'readline-sync';
 import 'dotenv/config'
-import { newUser, riddleTemplate } from './utils/utilityFunction.js';
+import { newUser, riddleTemplate, templateRiddleChenge } from './utils/utilityFunction.js';
 
 let running = true;
 
@@ -44,7 +44,7 @@ async function startMene() {
                         console.log(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathCreateUser}`)
                         //started to create a user
                         //
-                       await new Promise(resolve => setTimeout(resolve, 1000))
+                        await new Promise(resolve => setTimeout(resolve, 1000))
                         const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathCreateUser}`, {
                             method: "POST",
                             headers: {
@@ -62,30 +62,29 @@ async function startMene() {
                         console.log("oopss samting wrong ", error);
                     }
                 }
-                else{
-                    console.log(`🔍 Trying to fetch from: http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`);
-
+                else {
+                    //פה אני צריך לעשות לולאה שרצה ובודקת האם התשובה נכונה אם כן לקדם לשאלה הבא
+                    // console.log(`🔍 Trying to fetch from: http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`);
                     const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`)
                     const data = await response.json();
                     console.log(data);
-                    
                 }
                 break;
-
+            //Work V
             case "2":
                 console.log("🧩 Creating a new riddle...");
                 try {
 
                     const newRiddle = await riddleTemplate()
-                   await new Promise(resolve => setTimeout(resolve, 1000))
-                   console.log(typeof newRiddle , newRiddle);
-                   
+                    await new Promise(resolve => setTimeout(resolve, 1000))
+                    console.log(typeof newRiddle, newRiddle);
+
                     const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathCreateReiddle}`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
                         },
-                        
+
                         body: JSON.stringify(newRiddle)
                     })
                     console.log("conect sucsessfuly")
@@ -98,23 +97,38 @@ async function startMene() {
                 }
                 break;
 
+            //Work V
             case "3":
                 console.log("📖 Reading all riddles...");
-
-                const riddles = await getAllRiddlesAPI()
-
-                //בקשת מהשרת לקראיה של החידות
-                fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`)
-                //take
+                const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`)
+                const data = await response.json();
+                console.log(data);
+                console.log("--------------END---------------");
                 break;
             case "4":
                 console.log("✏️ Updating a riddle...");
                 //
-                fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathUpdateRiddle}`)
+                const temp = templateRiddleChenge()
+                console.log(typeof temp, temp);
+                const idChenge = readline.question("Please enter your id: ")
+                try {
+                    const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathUpdateRiddle}${idChenge}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(temp)
+                    });
+                    const result = await response.text()
+                    console.log("Success update:", result);
+                } catch (error) {
+                    console.error(" Error:", error);
+                }
                 break;
             case "5":
                 console.log("❌ Deleting a riddle...");
-                fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathDeleteRiddle}`)
+                fetch(`http://${process.env.ipServer
+                    }: ${process.env.port} / ${process.env.pathDeleteRiddle}`)
                 break;
             case "6":
                 console.log("🏆 Showing leaderboard...");

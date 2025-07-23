@@ -33,3 +33,19 @@ export function riddleTemplate()
     }
     return riddleTemplit;
 }
+
+// func for menu update
+export function templateRiddleChenge()
+{
+   const inputChenge = readline.question("Plese enter chenge 1. for name 2. taskDescription 3.correctAnswer ")
+    switch (inputChenge) {
+        case "1":
+            return {name: readline.question("Plese enter a new name: ")}
+        case "2":
+            return {taskDescription: readline.question("Please enter a new question: ")}
+        case "3":
+            return {correctAnswer: readline.question("Please enter a new answer: ")}
+        default:
+            break;
+    }
+}

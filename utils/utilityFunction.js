@@ -12,9 +12,8 @@ import readline from 'readline-sync';
 //     return counter; 
 // }
 
-export async function newUser(name, TimeStatistics = 0)
-{
-   const templitJson =
+export async function newUser(name, TimeStatistics = 0) {
+    const templitJson =
     {
         // No need counter, its atomatic on supa
         "name": name,
@@ -23,9 +22,8 @@ export async function newUser(name, TimeStatistics = 0)
     return templitJson
 }
 //riddle templite
-export function riddleTemplate()
-{
-    const riddleTemplit = 
+export function riddleTemplate() {
+    const riddleTemplit =
     {
         name: readline.question("Plese enter a name: "),
         taskDescription: readline.question("Please enter a question: "),
@@ -35,17 +33,42 @@ export function riddleTemplate()
 }
 
 // func for menu update
-export function templateRiddleChenge()
-{
-   const inputChenge = readline.question("Plese enter chenge 1. for name 2. taskDescription 3.correctAnswer ")
+export function templateRiddleChenge() {
+    const inputChenge = readline.question("Plese enter chenge 1. for name 2. taskDescription 3.correctAnswer ")
     switch (inputChenge) {
         case "1":
-            return {name: readline.question("Plese enter a new name: ")}
+            return { name: readline.question("Plese enter a new name: ") }
         case "2":
-            return {taskDescription: readline.question("Please enter a new question: ")}
+            return { taskDescription: readline.question("Please enter a new question: ") }
         case "3":
-            return {correctAnswer: readline.question("Please enter a new answer: ")}
+            return { correctAnswer: readline.question("Please enter a new answer: ") }
         default:
             break;
     }
+}
+
+export function templateUserChenge() {
+    const inputChenge = readline.question("Plese enter chenge 1. for name 2. TimeStatistics 3.RiddleId ")
+    switch (inputChenge) {
+        case "1":
+            return { name: readline.question("Plese enter a new name: ") }
+        case "2":
+            return { TimeStatistics: readline.question("Please enter a new TimeStatistics: ") }
+        case "3":
+            return { RiddleId: readline.question("Please enter a new RiddleId: ") }
+        default:
+            break;
+    }
+}
+
+export function checkId(id) {
+
+}
+
+export async function Leaderboard() {
+    console.log("hi from Leaderboard: ");
+    const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathGetUser}`)
+    const result = await response.json();
+    const riddles = result.data;
+    return result
 }

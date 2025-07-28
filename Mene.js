@@ -1,10 +1,12 @@
 import readline from 'readline-sync';
 import 'dotenv/config'
-import { newUser, riddleTemplate, templateRiddleChenge } from './utils/utilityFunction.js';
+import { newUser, riddleTemplate, templateRiddleChenge, Leaderboard } from './utils/utilityFunction.js';
+
+import { serchByID } from "./func/menuFunction.js"
 
 let running = true;
 
-async function startMene() {
+export async function startMene() {
     while (running) {
         const menu = `
 ╔══════════════════════════════════════════════════╗
@@ -25,14 +27,27 @@ async function startMene() {
 `;
 
         let userInput = readline.question(menu);
-        //IMPORTENT!!! Fix the user req for delete/ update/ get 
         switch (userInput) {
             case "1":
                 console.log("🎮 Let's play the game!");
                 //serch by id!, I need to create a smart serch by name 
-                const id = readline.question("Please enter yore id, if you dont have enter 0: ")
-                //צריך לעשות משתנה ששומר את הערך של הלקוח ובודק האם הוא בתוך הDB בשביל לחפש אותו או ליצור אותו, וכמובן לשנות את התנאים
-                if (id === "0") {
+                const input = readline.question("Please enter yoru id or name: ")
+
+            
+
+                let query;
+                if (!isNaN(input)) {
+                    // אם הקלט מספרי, נשתמש בשדה id
+                    query = { id: Number(input) };
+                } else {
+                    // אם הקלט טקסט, נשתמש בשדה name
+                    query = { name: input };
+                }
+
+                const connectToDB = await serchByID(query);
+                console.log(connectToDB);
+
+                if (!connectToDB) {
                     try {
                         const name = readline.question("Please enter your name: ")
                         // I get an abject
@@ -63,11 +78,55 @@ async function startMene() {
                     }
                 }
                 else {
-                    //פה אני צריך לעשות לולאה שרצה ובודקת האם התשובה נכונה אם כן לקדם לשאלה הבא
-                    // console.log(`🔍 Trying to fetch from: http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`);
                     const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathReadRiddle}`)
-                    const data = await response.json();
-                    console.log(data);
+                    const result = await response.json();
+                    const riddles = result.data;
+
+                    const timePerQuestion = [];
+                    const startTime = Date.now();
+
+                    for (const riddle of riddles) {
+                        let userAnswer = "";
+                        console.log("🧩 Question:", riddle.taskDescription);
+
+                        const questionStart = Date.now();
+
+                        while (userAnswer !== riddle.correctAnswer) {
+                            userAnswer = readline.question("enter your answer: ");
+                            if (userAnswer !== riddle.correctAnswer) {
+                                console.log("Incorrect 😢");
+                            } else {
+                                console.log("Correct 😁");
+                            }
+                        }
+
+                        const questionEnd = Date.now();
+                        const duration = (questionEnd - questionStart) / 1000;
+                        timePerQuestion.push(duration);
+                    }
+
+                    const endTime = Date.now();
+                    const totalTime = (endTime - startTime) / 1000;
+                    const averageTime = timePerQuestion.reduce((a, b) => a + b, 0) / timePerQuestion.length;
+
+                    console.log("\n🕒 Game Summary:");
+                    console.log("⏱️ Total time:", totalTime.toFixed(2), "seconds");
+                    console.log("📊 Average time per question:", averageTime.toFixed(2), "seconds");
+                    console.log("⏲️ Time per question:", timePerQuestion);
+                    console.log(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathUpdateUser}${input}`);
+                    
+                    const responseu = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathUpdateUser}${input}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ timestatistics : averageTime }) // שליחה בגוף הבקשה
+                    });
+
+
+                    const result1 = await responseu.json();
+                    console.log("📝 Update result:", result1);
+
                 }
                 break;
             //Work V
@@ -96,7 +155,6 @@ async function startMene() {
                     console.log("oopss samting wrong ", error);
                 }
                 break;
-
             //Work V
             case "3":
                 console.log("📖 Reading all riddles...");
@@ -105,9 +163,9 @@ async function startMene() {
                 console.log(data);
                 console.log("--------------END---------------");
                 break;
+            //Work V
             case "4":
                 console.log("✏️ Updating a riddle...");
-                //
                 const temp = templateRiddleChenge()
                 console.log(typeof temp, temp);
                 const idChenge = readline.question("Please enter your id: ")
@@ -125,13 +183,26 @@ async function startMene() {
                     console.error(" Error:", error);
                 }
                 break;
+            //Work V
             case "5":
                 console.log("❌ Deleting a riddle...");
-                fetch(`http://${process.env.ipServer
-                    }: ${process.env.port} / ${process.env.pathDeleteRiddle}`)
+
+                const idToDelete = readline.question("Please enter id for delete: ")
+                try {
+                    const response = await fetch(`http://${process.env.ipServer}:${process.env.port}/${process.env.pathDeleteRiddle}${idToDelete}`, {
+                        method: "DELETE"
+                    })
+                    const result = await response.text()
+                    console.log("Server response:", result);
+                }
+                catch (err) {
+                    console.log(err);
+                }
                 break;
+
             case "6":
                 console.log("🏆 Showing leaderboard...");
+                console.log(await Leaderboard());
                 break;
             case "0":
                 console.log("👋 Exiting the game. Goodbye!");
@@ -147,4 +218,3 @@ async function startMene() {
     }
 }
 
-startMene()
